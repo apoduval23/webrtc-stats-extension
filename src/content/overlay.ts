@@ -52,55 +52,27 @@ export function initOverlay() {
       </div>
       <button id="close-btn" class="close-btn">×</button>
     </div>
-    <div class="stats-grid">
-      <div class="stat-group">
-        <div class="stat-label">VIDEO</div>
-        <div style="display: flex; gap: 20px;">
-          <div>
-            <div class="stat-sublabel">Bitrate</div>
-            <div class="stat-value" id="video-bitrate">0 kbps</div>
-          </div>
-          <div>
-            <div class="stat-sublabel">FPS</div>
-            <div class="stat-value" id="video-fps">0</div>
-          </div>
-        </div>
-        <div style="margin-top: 8px;">
-          <div class="stat-sublabel">Resolution</div>
-          <div class="stat-value" id="video-res">-</div>
-        </div>
+    <div class="section">
+      <div class="section-title">Video</div>
+      <div class="stat-grid">
+        <div class="stat-item"><span class="stat-label">Bitrate</span><span class="stat-value" id="video-bitrate">-</span></div>
+        <div class="stat-item"><span class="stat-label">FPS</span><span class="stat-value" id="video-fps">-</span></div>
+        <div class="stat-item" style="grid-column: span 2;"><span class="stat-label">Resolution</span><span class="stat-value" id="video-res">-</span></div>
       </div>
-
-      <div class="stat-group">
-        <div class="stat-label">NETWORK</div>
-        <div style="display: flex; gap: 20px;">
-          <div>
-            <div class="stat-sublabel">Loss</div>
-            <div class="stat-value" id="net-loss">0%</div>
-          </div>
-          <div>
-            <div class="stat-sublabel">RTT</div>
-            <div class="stat-value" id="net-rtt">0 ms</div>
-          </div>
-        </div>
-        <div style="margin-top: 8px;">
-          <div class="stat-sublabel">Jitter</div>
-          <div class="stat-value" id="net-jitter">0 ms</div>
-        </div>
+    </div>
+    <div class="section">
+      <div class="section-title">Network</div>
+      <div class="stat-grid">
+        <div class="stat-item"><span class="stat-label">Loss</span><span class="stat-value" id="net-loss">-</span></div>
+        <div class="stat-item"><span class="stat-label">RTT</span><span class="stat-value" id="net-rtt">-</span></div>
+        <div class="stat-item" style="grid-column: span 2;"><span class="stat-label">Jitter</span><span class="stat-value" id="net-jitter">-</span></div>
       </div>
-
-      <div class="stat-group" style="border-bottom: none;">
-        <div class="stat-label">CONNECTION</div>
-        <div style="display: flex; gap: 20px;">
-          <div>
-            <div class="stat-sublabel">State</div>
-            <div class="stat-value" id="conn-state">-</div>
-          </div>
-          <div>
-            <div class="stat-sublabel">ICE Type</div>
-            <div class="stat-value" id="conn-type">-</div>
-          </div>
-        </div>
+    </div>
+    <div class="section" style="border-bottom: none;">
+      <div class="section-title">Connection</div>
+      <div class="stat-grid">
+        <div class="stat-item"><span class="stat-label">State</span><span class="stat-value" id="conn-state">-</span></div>
+        <div class="stat-item"><span class="stat-label">ICE Type</span><span class="stat-value" id="conn-type">-</span></div>
       </div>
     </div>
     
