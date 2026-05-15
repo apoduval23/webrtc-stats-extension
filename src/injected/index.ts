@@ -152,7 +152,10 @@ setInterval(async () => {
       window.postMessage({
         source: 'webrtc-stats-injected',
         type: 'WEBRTC_STATS_UPDATE',
-        data: normalized
+        data: {
+          ...normalized,
+          platform: window.location.hostname
+        }
       }, '*');
     } catch (e) {
       console.warn('Failed to get stats', e);

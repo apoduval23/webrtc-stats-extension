@@ -78,7 +78,7 @@ export function initOverlay() {
     </div>
     <div id="insight-box">Waiting for data...</div>
   `;
-  
+
   shadowRoot.appendChild(overlayEl);
 
   // Cache elements
@@ -121,40 +121,20 @@ export function updateOverlay(stats: any) {
   if (elements.connState) elements.connState.textContent = stats.connection.state;
   if (elements.connType) elements.connType.textContent = stats.connection.iceType || '-';
 
-  // Health calculation
-  let health = 'good';
-  let insight = 'Connection is stable.';
-  let insightClass = '';
+  // Health calculation from Background
+  if (stats.health) {
+    if (elements.healthDot) {
+      elements.healthDot.className = `health-dot ${stats.health.status}`;
+    }
+    if (elements.insightBox) {
+      elements.insightBox.textContent = stats.health.insight;
+      elements.insightBox.className = stats.health.insightClass;
+    }
+  }
 
-  const loss = stats.network.packetLoss || 0;
+  // Extract variables for graph
   const rtt = stats.network.rtt || 0;
   const bitrate = stats.video.bitrate || 0;
-
-  if (loss > 5 || rtt > 300) {
-    health = 'poor';
-    insightClass = 'critical';
-    if (loss > 5) insight = 'High packet loss detected → possible network congestion.';
-    else insight = 'High latency (RTT) → connection may feel unresponsive.';
-  } else if (loss > 1 || rtt > 100) {
-    health = 'moderate';
-    insightClass = 'warning';
-    if (loss > 1) insight = 'Moderate packet loss → video may stutter.';
-    else insight = 'Elevated latency → minor delays expected.';
-  } else if (stats.connection.iceType && stats.connection.iceType.includes('relay')) {
-    insightClass = 'warning';
-    insight = 'Using TURN relay → increased latency expected.';
-  } else if (bitrate > 0 && bitrate < 100000 && stats.video.fps > 0) {
-    insightClass = 'warning';
-    insight = 'Low bitrate → possible bandwidth constraint.';
-  }
-
-  if (elements.healthDot) {
-    elements.healthDot.className = `health-dot ${health}`;
-  }
-  if (elements.insightBox) {
-    elements.insightBox.textContent = insight;
-    elements.insightBox.className = insightClass;
-  }
 
   // Update Graph Data
   rttHistory.push(rtt);
@@ -169,7 +149,7 @@ function drawGraph() {
   if (!ctx || !elements.canvas) return;
   const width = elements.canvas.width;
   const height = elements.canvas.height;
-  
+
   ctx.clearRect(0, 0, width, height);
 
   const maxRtt = Math.max(300, ...rttHistory);
@@ -204,7 +184,7 @@ function drawGraph() {
 
 function makeDraggable(dragHandle: HTMLElement, el: HTMLElement) {
   let pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-  
+
   dragHandle.onmousedown = dragMouseDown;
 
   function dragMouseDown(e: MouseEvent) {
@@ -221,7 +201,7 @@ function makeDraggable(dragHandle: HTMLElement, el: HTMLElement) {
     pos2 = pos4 - e.clientY;
     pos3 = e.clientX;
     pos4 = e.clientY;
-    
+
     el.style.position = 'fixed';
     el.style.top = (el.offsetTop - pos2) + "px";
     el.style.left = (el.offsetLeft - pos1) + "px";

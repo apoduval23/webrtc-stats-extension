@@ -1,3 +1,5 @@
+import { computeHealth } from '../shared/insights';
+
 console.log('WebRTC Stats Extension: Background Service Worker loaded');
 
 const tabStats = new Map<number, any>();
@@ -5,6 +7,11 @@ const tabStats = new Map<number, any>();
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'WEBRTC_STATS_UPDATE' && sender.tab?.id) {
     const tabId = sender.tab.id;
+    
+    // Compute health before broadcasting
+    const platform = message.data.platform || 'default';
+    message.data.health = computeHealth(message.data, platform);
+
     tabStats.set(tabId, message.data);
 
     chrome.tabs.sendMessage(tabId, {
