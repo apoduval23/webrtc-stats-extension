@@ -45,10 +45,10 @@ export function initOverlay() {
   overlayEl = document.createElement('div');
   overlayEl.id = 'webrtc-overlay-card';
   overlayEl.innerHTML = `
-    <div class="overlay-header" id="drag-handle">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <div id="health-dot" class="health-dot good"></div>
-        <div class="overlay-title">WebRTC Stats</div>
+    <div id="overlay-header">
+      <div class="title-area">
+        <div class="health-dot" id="health-dot"></div>
+        WebRTC Stats
       </div>
       <button id="close-btn" class="close-btn">×</button>
     </div>
@@ -76,10 +76,10 @@ export function initOverlay() {
       </div>
     </div>
     
-    <div class="graph-container">
+    <div id="graph-container">
       <div class="graph-legend">
-        <span class="legend-item"><span class="legend-color" style="background: #3b82f6;"></span>Bitrate</span>
-        <span class="legend-item"><span class="legend-color" style="background: #ef4444;"></span>RTT</span>
+        <div class="legend-item"><div class="legend-color" style="background: #3b82f6;"></div>Bitrate</div>
+        <div class="legend-item"><div class="legend-color" style="background: #ef4444;"></div>RTT</div>
       </div>
       <canvas id="stats-graph" width="280" height="60"></canvas>
     </div>
@@ -91,7 +91,7 @@ export function initOverlay() {
 
   shadowRoot.appendChild(overlayEl);
 
-  const dragHandle = shadowRoot.getElementById('drag-handle');
+  const dragHandle = shadowRoot.getElementById('overlay-header');
   if (dragHandle) makeDraggable(dragHandle, overlayEl);
 
   const closeBtn = shadowRoot.getElementById('close-btn');
