@@ -140,7 +140,7 @@ export function initOverlay() {
   elements.netJitter = shadowRoot.getElementById('net-jitter');
   elements.connType = shadowRoot.getElementById('conn-type');
   elements.connState = shadowRoot.getElementById('conn-state');
-  elements.canvas = shadowRoot.getElementById('live-graph') as HTMLCanvasElement;
+  elements.canvas = shadowRoot.getElementById('stats-graph') as HTMLCanvasElement;
 
   if (elements.canvas) {
     // Setup canvas
@@ -150,8 +150,6 @@ export function initOverlay() {
     elements.canvas.height = rect.height || 80;
     ctx = elements.canvas.getContext('2d');
   }
-
-  makeDraggable(shadowRoot.getElementById('overlay-header')!, overlayEl);
 }
 
 export function updateOverlay(stats: any) {
