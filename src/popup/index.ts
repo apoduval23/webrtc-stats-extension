@@ -64,4 +64,16 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     }
   });
+
+  // Toggle Overlay Button Logic
+  const toggleBtn = document.getElementById('toggle-overlay-btn');
+  if (toggleBtn) {
+    toggleBtn.addEventListener('click', () => {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]?.id) {
+          chrome.tabs.sendMessage(tabs[0].id, { type: 'TOGGLE_OVERLAY' }).catch(() => {});
+        }
+      });
+    });
+  }
 });

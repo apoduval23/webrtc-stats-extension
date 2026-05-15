@@ -1,10 +1,10 @@
 console.log('WebRTC Stats Extension: Injected Script loaded');
 
 const OriginalRTCPeerConnection = window.RTCPeerConnection;
-const peerConnections: Set<RTCPeerConnection> = new Set();
+const peerConnections = new Set();
 
-window.RTCPeerConnection = function(...args: any[]) {
-  const pc = new OriginalRTCPeerConnection(...(args as any));
+window.RTCPeerConnection = function(...args) {
+  const pc = new OriginalRTCPeerConnection(...args);
   peerConnections.add(pc);
 
   const cleanup = () => {
@@ -13,13 +13,13 @@ window.RTCPeerConnection = function(...args: any[]) {
   
   pc.addEventListener('close', cleanup);
   return pc;
-} as any;
+};
 
 window.RTCPeerConnection.prototype = OriginalRTCPeerConnection.prototype;
 
-const previousStats = new WeakMap<RTCPeerConnection, Map<string, any>>();
+const previousStats = new WeakMap();
 
-function normalizeStats(stats: RTCStatsReport, pc: RTCPeerConnection) {
+function normalizeStats(stats, pc) {
   const result = {
     video: { bitrate: 0, fps: 0, resolution: '' },
     audio: { bitrate: 0 },
@@ -39,7 +39,7 @@ function normalizeStats(stats: RTCStatsReport, pc: RTCPeerConnection) {
   let maxJitter = 0;
 
   stats.forEach(stat => {
-    const prevStat = prevStatsMap!.get(stat.id);
+    const prevStat = prevStatsMap.get(stat.id);
     
     if (stat.type === 'inbound-rtp') {
       if (stat.kind === 'video') {
@@ -117,7 +117,7 @@ function normalizeStats(stats: RTCStatsReport, pc: RTCPeerConnection) {
       }
     }
     
-    prevStatsMap!.set(stat.id, stat);
+    prevStatsMap.set(stat.id, stat);
   });
 
   if (totalPacketsSent > 0) {
@@ -132,7 +132,7 @@ function normalizeStats(stats: RTCStatsReport, pc: RTCPeerConnection) {
 setInterval(async () => {
   if (peerConnections.size === 0) return;
 
-  let activePc: RTCPeerConnection | null = null;
+  let activePc = null;
   for (const pc of peerConnections) {
     if (pc.connectionState === 'connected' || pc.connectionState === 'connecting') {
       activePc = pc;

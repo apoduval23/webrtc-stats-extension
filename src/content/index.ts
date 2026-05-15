@@ -1,20 +1,6 @@
-import { initOverlay, updateOverlay } from './overlay';
+import { initOverlay, updateOverlay, toggleOverlay } from './overlay';
 
 console.log('WebRTC Stats Extension: Content Script loaded');
-
-// Inject the `injected/index.ts` script into the main page context
-// This allows the injected script to access the actual window object (and thus window.RTCPeerConnection)
-const script = document.createElement('script');
-// In Vite/crxjs, web_accessible_resources are resolved correctly, but doing it dynamically here:
-script.src = chrome.runtime.getURL('src/injected/index.ts');
-script.type = 'module';
-
-script.onload = () => {
-  script.remove();
-};
-
-// Insert before any other scripts to ensure we hook early
-(document.head || document.documentElement).prepend(script);
 
 // Initialize Overlay
 initOverlay();
@@ -32,6 +18,8 @@ window.addEventListener('message', (event) => {
 chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   if (message.type === 'WEBRTC_STATS_BROADCAST') {
     updateOverlay(message.data);
+  } else if (message.type === 'TOGGLE_OVERLAY') {
+    toggleOverlay();
   }
   sendResponse({ status: 'ok' });
 });

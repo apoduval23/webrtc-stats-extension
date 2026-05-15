@@ -29,7 +29,12 @@ export function initOverlay() {
 
   const host = document.createElement('div');
   host.id = 'webrtc-stats-host';
-  document.body.appendChild(host);
+  
+  if (document.body) {
+    document.body.appendChild(host);
+  } else {
+    document.documentElement.appendChild(host);
+  }
 
   shadowRoot = host.attachShadow({ mode: 'open' });
 
@@ -40,53 +45,96 @@ export function initOverlay() {
   overlayEl = document.createElement('div');
   overlayEl.id = 'webrtc-overlay-card';
   overlayEl.innerHTML = `
-    <div id="overlay-header">
-      <div class="title-area">
-        <div class="health-dot" id="health-dot"></div>
-        WebRTC Stats
+    <div class="overlay-header" id="drag-handle">
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div id="health-dot" class="health-dot good"></div>
+        <div class="overlay-title">WebRTC Stats</div>
+      </div>
+      <button id="close-btn" class="close-btn">×</button>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-group">
+        <div class="stat-label">VIDEO</div>
+        <div style="display: flex; gap: 20px;">
+          <div>
+            <div class="stat-sublabel">Bitrate</div>
+            <div class="stat-value" id="video-bitrate">0 kbps</div>
+          </div>
+          <div>
+            <div class="stat-sublabel">FPS</div>
+            <div class="stat-value" id="video-fps">0</div>
+          </div>
+        </div>
+        <div style="margin-top: 8px;">
+          <div class="stat-sublabel">Resolution</div>
+          <div class="stat-value" id="video-res">-</div>
+        </div>
+      </div>
+
+      <div class="stat-group">
+        <div class="stat-label">NETWORK</div>
+        <div style="display: flex; gap: 20px;">
+          <div>
+            <div class="stat-sublabel">Loss</div>
+            <div class="stat-value" id="net-loss">0%</div>
+          </div>
+          <div>
+            <div class="stat-sublabel">RTT</div>
+            <div class="stat-value" id="net-rtt">0 ms</div>
+          </div>
+        </div>
+        <div style="margin-top: 8px;">
+          <div class="stat-sublabel">Jitter</div>
+          <div class="stat-value" id="net-jitter">0 ms</div>
+        </div>
+      </div>
+
+      <div class="stat-group" style="border-bottom: none;">
+        <div class="stat-label">CONNECTION</div>
+        <div style="display: flex; gap: 20px;">
+          <div>
+            <div class="stat-sublabel">State</div>
+            <div class="stat-value" id="conn-state">-</div>
+          </div>
+          <div>
+            <div class="stat-sublabel">ICE Type</div>
+            <div class="stat-value" id="conn-type">-</div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="section">
-      <div class="section-title">Video</div>
-      <div class="stat-grid">
-        <div class="stat-item"><span class="stat-label">Bitrate</span><span class="stat-value" id="vid-bitrate">-</span></div>
-        <div class="stat-item"><span class="stat-label">FPS</span><span class="stat-value" id="vid-fps">-</span></div>
-        <div class="stat-item" style="grid-column: span 2;"><span class="stat-label">Resolution</span><span class="stat-value" id="vid-res">-</span></div>
-      </div>
-    </div>
-    <div class="section">
-      <div class="section-title">Network</div>
-      <div class="stat-grid">
-        <div class="stat-item"><span class="stat-label">Loss</span><span class="stat-value" id="net-loss">-</span></div>
-        <div class="stat-item"><span class="stat-label">RTT</span><span class="stat-value" id="net-rtt">-</span></div>
-        <div class="stat-item" style="grid-column: span 2;"><span class="stat-label">Jitter</span><span class="stat-value" id="net-jitter">-</span></div>
-      </div>
-    </div>
-    <div class="section">
-      <div class="section-title">Connection</div>
-      <div class="stat-grid">
-        <div class="stat-item"><span class="stat-label">State</span><span class="stat-value" id="conn-state">-</span></div>
-        <div class="stat-item"><span class="stat-label">ICE Type</span><span class="stat-value" id="conn-type">-</span></div>
-      </div>
-    </div>
-    <div id="graph-container">
+    
+    <div class="graph-container">
       <div class="graph-legend">
-        <div class="legend-item"><div class="legend-color" style="background:#3b82f6;"></div>Bitrate</div>
-        <div class="legend-item"><div class="legend-color" style="background:#ef4444;"></div>RTT</div>
+        <span class="legend-item"><span class="legend-color" style="background: #3b82f6;"></span>Bitrate</span>
+        <span class="legend-item"><span class="legend-color" style="background: #ef4444;"></span>RTT</span>
       </div>
-      <canvas id="live-graph"></canvas>
+      <canvas id="stats-graph" width="280" height="60"></canvas>
     </div>
-    <div id="insight-box">Waiting for data...</div>
+
+    <div class="insight-box" id="insight-box">
+      Waiting for connection...
+    </div>
   `;
 
   shadowRoot.appendChild(overlayEl);
 
-  // Cache elements
+  const dragHandle = shadowRoot.getElementById('drag-handle');
+  if (dragHandle) makeDraggable(dragHandle, overlayEl);
+
+  const closeBtn = shadowRoot.getElementById('close-btn');
+  if (closeBtn) {
+    closeBtn.addEventListener('click', () => {
+      toggleOverlay(false);
+    });
+  }
+
+  // Map elements
   elements.healthDot = shadowRoot.getElementById('health-dot');
   elements.insightBox = shadowRoot.getElementById('insight-box');
-  elements.videoBitrate = shadowRoot.getElementById('vid-bitrate');
-  elements.videoFps = shadowRoot.getElementById('vid-fps');
-  elements.videoRes = shadowRoot.getElementById('vid-res');
+  elements.videoBitrate = shadowRoot.getElementById('video-bitrate');
+  elements.videoFps = shadowRoot.getElementById('video-fps');
+  elements.videoRes = shadowRoot.getElementById('video-res');
   elements.netLoss = shadowRoot.getElementById('net-loss');
   elements.netRtt = shadowRoot.getElementById('net-rtt');
   elements.netJitter = shadowRoot.getElementById('net-jitter');
@@ -211,5 +259,16 @@ function makeDraggable(dragHandle: HTMLElement, el: HTMLElement) {
   function closeDragElement() {
     document.onmouseup = null;
     document.onmousemove = null;
+  }
+}
+
+export function toggleOverlay(show?: boolean) {
+  const host = document.getElementById('webrtc-stats-host');
+  if (!host) return;
+  
+  if (show === undefined) {
+    host.style.display = host.style.display === 'none' ? 'block' : 'none';
+  } else {
+    host.style.display = show ? 'block' : 'none';
   }
 }
